@@ -29,6 +29,12 @@ import java.util.logging.Logger;
 public class maidsafeRootAction implements UnprotectedRootAction {
 
     static final String URL = "maidsafehook"; // configure webhook for pull requests
+    private static final Logger logger = Logger.getLogger(maidsafeRootAction.class.getName());
+    private maidsafeGitHub msgh;
+
+    public String getIconFileName() {
+        return null;
+    }
 
     public String getDisplayName() {
         return null;
@@ -37,4 +43,18 @@ public class maidsafeRootAction implements UnprotectedRootAction {
     public String getUrlName() {
         return URL;
     }
+
+    public void doIndex(StaplerRequest req, StaplerResponse resp) {
+        String event = req.getHeader("X-GitHub-Event");
+        String payload = req.getParameter("payload"); // setup GitHub webhook
+        if (payload == null) {
+            logger.log(Level.SEVERE, "Request does not contain a payload.");
+            return;
+        }
+
+        maidsafe
+    }
+
+
+
 }
