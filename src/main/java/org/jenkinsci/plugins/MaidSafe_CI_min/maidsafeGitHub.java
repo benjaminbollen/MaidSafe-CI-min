@@ -14,9 +14,9 @@ public class maidsafeGitHub {
     private static final Logger logger = Logger.getLogger(maidsafeGitHub.class.getName());
     private GitHub gh;
 
-    private GitHub get() throws IOException {
+    public GitHub get() throws IOException {
         if (gh == null) {
-            connect()
+            connect();
         }
         return gh;
     }

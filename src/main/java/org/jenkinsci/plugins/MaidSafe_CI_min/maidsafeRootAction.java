@@ -30,7 +30,7 @@ public class maidsafeRootAction implements UnprotectedRootAction {
 
     static final String URL = "maidsafehook"; // configure webhook for pull requests
     private static final Logger logger = Logger.getLogger(maidsafeRootAction.class.getName());
-    private maidsafeGitHub msgh;
+    private static maidsafeGitHub msgh;
 
     public String getIconFileName() {
         return null;
@@ -52,7 +52,17 @@ public class maidsafeRootAction implements UnprotectedRootAction {
             return;
         }
 
-        maidsafe
+        if (msgh  == null) {
+            msgh = new maidsafeGitHub();
+        }
+
+        logger.log(Level.INFO, "Received payload event: {0}", event);
+        try {
+            if ("pull_request".equals(event)) {
+                GHEventPayload.PullRequest pr = msgh.get().parseEventPayLoad(new StringReader(payload), GHEventPayload.PullRequest.class);
+                
+            }
+        }
     }
 
 
