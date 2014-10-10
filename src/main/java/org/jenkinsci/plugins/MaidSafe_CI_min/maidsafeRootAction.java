@@ -60,8 +60,28 @@ public class maidsafeRootAction implements UnprotectedRootAction {
         try {
             if ("pull_request".equals(event)) {
                 GHEventPayload.PullRequest pr = msgh.get().parseEventPayLoad(new StringReader(payload), GHEventPayload.PullRequest.class);
-                
+
             }
+        }
+    }
+
+    private Set<GhprbRepository> getRepos(GHRepository repo) throws IOException {
+        try {
+            return getRepos(repo.getOwner().getLogin() + "/" + repo.getName());
+        } catch (Exception ex) {
+            logger.log(Level.WARNING, "Can't get a valid owner for repo " + repo.getName());
+            // this normally happens due to missing "login" field in the owner of the repo
+            // when the repo is inside of an organisation account. The only field which doesn't
+            // rely on the owner.login (which would throw a null pointer exception) is the "html_url"
+            // field. So we try to parse the owner out of that here until github fixes his api
+            String repoUrl = repo.getUrl();
+            if (repoUrl.endsWith("/")) {// strip off trailing slash if any
+                repoUrl = repoUrl.substring(0, repoUrl.length() - 2);
+            }
+            int slashIndex = repoUrl.lastIndexOf('/');
+            String owner = repoUrl.substring(slashIndex + 1);
+            logger.log(Level.INFO, "Parsed {0} from {1}", new Object[]{owner, repoUrl});
+            return getRepos(owner + "/" + repo.getName());
         }
     }
 
