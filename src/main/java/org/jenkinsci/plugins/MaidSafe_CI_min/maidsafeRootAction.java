@@ -12,10 +12,13 @@ import org.kohsuke.github.GHRepository;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
+import java.awt.*;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.kohsuke.github.GitHub;
@@ -31,7 +34,9 @@ public class maidsafeRootAction implements UnprotectedRootAction {
 
     static final String URL = "maidsafehook"; // configure webhook for pull requests
     private static final Logger logger = Logger.getLogger(maidsafeRootAction.class.getName());
-    public maidsafeGitHub msgh;
+    private maidsafeGitHub msgh;
+    private ConcurrentMap<String, maidsafeTask> msTasks;
+
 
     public String getIconFileName() {
         return null;
@@ -42,7 +47,6 @@ public class maidsafeRootAction implements UnprotectedRootAction {
     }
 
     public String getUrlName() {
-        logger.log(Level.INFO, "URL got requested.");
         return URL;
     }
 
@@ -63,14 +67,20 @@ public class maidsafeRootAction implements UnprotectedRootAction {
         try {
             if ("pull_request".equals(event)) {
                 GHEventPayload.PullRequest pr;
+                logger.log(Level.INFO, "Created GHPullRequest");
                 pr = msgh.get().parseEventPayload(new StringReader(payload), GHEventPayload.PullRequest.class);
+                logger.log(Level.INFO, "Parsed pr");
                 //pr = msgh.get().parseEventPayLoad(new StringReader(payload), GHEventPayload.PullRequest.class);
-                logger.log(Level.INFO, "pr: ");
+
+                logger.log(Level.INFO, "pr label: {0}", pr.getPullRequest().getHead().getLabel());
+
             }
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Failed to parse GitHub hook payload.", ex);
         }
     }
+
+
 
     /*private Set<maidsafeTask> getTasks(GHRepository repo) throws IOException {
         try {
