@@ -10,7 +10,7 @@ package org.jenkinsci.plugins.MaidSafe_CI_min;
  *
  */
 public class maidsafePrivateAccount {
-    private static final String accessToken = ""
+    private static final String accessToken = "";
 
     public String getPrivateAccessToken () {
         return accessToken;

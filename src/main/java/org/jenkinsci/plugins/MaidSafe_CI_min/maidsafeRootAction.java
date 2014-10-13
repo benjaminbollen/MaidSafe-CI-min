@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.kohsuke.github.GitHub;
 
 /**
  * Created by Benjamin Bollen on 07/10/14.
@@ -30,21 +31,23 @@ public class maidsafeRootAction implements UnprotectedRootAction {
 
     static final String URL = "maidsafehook"; // configure webhook for pull requests
     private static final Logger logger = Logger.getLogger(maidsafeRootAction.class.getName());
-    private static maidsafeGitHub msgh;
+    public maidsafeGitHub msgh;
 
     public String getIconFileName() {
         return null;
     }
 
     public String getDisplayName() {
-        return null;
+        return "maidsafeRootAction";
     }
 
     public String getUrlName() {
+        logger.log(Level.INFO, "URL got requested.");
         return URL;
     }
 
     public void doIndex(StaplerRequest req, StaplerResponse resp) {
+        logger.log(Level.INFO, "Triggered doIndex");
         String event = req.getHeader("X-GitHub-Event");
         String payload = req.getParameter("payload"); // setup GitHub webhook
         if (payload == null) {
@@ -59,13 +62,17 @@ public class maidsafeRootAction implements UnprotectedRootAction {
         logger.log(Level.INFO, "Received payload event: {0}", event);
         try {
             if ("pull_request".equals(event)) {
-                GHEventPayload.PullRequest pr = msgh.get().parseEventPayLoad(new StringReader(payload), GHEventPayload.PullRequest.class);
-
+                GHEventPayload.PullRequest pr;
+                pr = msgh.get().parseEventPayload(new StringReader(payload), GHEventPayload.PullRequest.class);
+                //pr = msgh.get().parseEventPayLoad(new StringReader(payload), GHEventPayload.PullRequest.class);
+                logger.log(Level.INFO, "pr: ");
             }
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "Failed to parse GitHub hook payload.", ex);
         }
     }
 
-    private Set<GhprbRepository> getRepos(GHRepository repo) throws IOException {
+    /*private Set<maidsafeTask> getTasks(GHRepository repo) throws IOException {
         try {
             return getRepos(repo.getOwner().getLogin() + "/" + repo.getName());
         } catch (Exception ex) {
@@ -84,6 +91,30 @@ public class maidsafeRootAction implements UnprotectedRootAction {
             return getRepos(owner + "/" + repo.getName());
         }
     }
+
+    private Set<maidsafeTask> getRepos(String repo) {
+        final Set<maidsafeTask> ret = new HashSet<maidsafeTask>();
+
+        // We need this to get access to list of repositories
+        Authentication old = SecurityContextHolder.getContext().getAuthentication();
+        SecurityContextHolder.getContext().setAuthentication(ACL.SYSTEM);
+
+        try {
+            for (AbstractProject<?, ?> job : Jenkins.getInstance().getAllItems(AbstractProject.class)) {
+                GhprbTrigger trigger = job.getTrigger(GhprbTrigger.class);
+                if (trigger == null || trigger.getRepository() == null) {
+                    continue;
+                }
+                GhprbRepository r = trigger.getRepository();
+                if (repo.equals(r.getName())) {
+                    ret.add(r);
+                }
+            }
+        } finally {
+            SecurityContextHolder.getContext().setAuthentication(old);
+        }
+        return ret;
+    }*/
 
 
 
